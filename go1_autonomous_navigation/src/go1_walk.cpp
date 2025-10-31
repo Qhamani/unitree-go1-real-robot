@@ -20,6 +20,9 @@ void cmdVelCallback(const geometry_msgs::Twist::ConstPtr& msg)
              msg->linear.x, msg->linear.y, msg->angular.z);
 }
 
+void targetVelocityMove(unitree_legged_msgs::HighCmd &cmd);
+void standUp(unitree_legged_msgs::HighCmd &cmd);
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "go1_cmdvel_bridge");
@@ -36,11 +39,11 @@ int main(int argc, char **argv)
     unitree_legged_msgs::HighCmd high_cmd_ros;
     long motiontime = 0;
 
-    // Publisher to Unitree command topic
+    // Publisher to command topic
     ros::Publisher pub = nh.advertise<unitree_legged_msgs::HighCmd>("high_cmd", 1000);
 
     // Subscriber to cmd_vel topic
-    ros::Subscriber sub = nh.subscribe("/cmd_vel", 1000, cmdVelCallback);
+    ros::Subscriber sub = nh.subscribe("/cmd_vel", 100, cmdVelCallback);
 
     ROS_INFO("Node go1_cmdvel_bridge started. Listening to /cmd_vel...");
 
@@ -64,26 +67,46 @@ int main(int argc, char **argv)
             high_cmd_ros.reserve = 0;
 
             isInitPose = true;
-            ROS_INFO("Initialised Pose");
+            // ROS_INFO("Initialised Pose");
         }
 
-        high_cmd_ros.mode = 2;
-        high_cmd_ros.gaitType = 1;
-        high_cmd_ros.velocity[0] = static_cast<float>(latest_cmd_vel.linear.x);   // forward/backward
-        high_cmd_ros.velocity[1] = static_cast<float>(latest_cmd_vel.linear.y);   // lateral
-        high_cmd_ros.yawSpeed   = static_cast<float>(latest_cmd_vel.angular.z);   // rotation
-        high_cmd_ros.bodyHeight = 0.1;
-
-        // Safety stop: if cmd_vel not updated for some time, zero velocities
-        // (optional, could add a timestamp check here later)
+        targetVelocityMove(high_cmd_ros);
 
         pub.publish(high_cmd_ros);
-
-        ROS_INFO("Published");
-
         ros::spinOnce();
         loop_rate.sleep();
     }
 
     return 0;
 }
+
+
+//----------------------------------------------------------------
+//                  move targeting velocity
+//----------------------------------------------------------------
+
+void targetVelocityMove(unitree_legged_msgs::HighCmd &cmd){
+
+    cmd.mode = 2;  // mode 2 => follows target velocity
+    cmd.gaitType = 1; // trotting gait
+    cmd.velocity[0] = latest_cmd_vel.linear.x;   
+    cmd.velocity[1] = latest_cmd_vel.linear.y;   
+    cmd.yawSpeed   = latest_cmd_vel.angular.z; 
+    cmd.bodyHeight = 0.1;
+
+}
+
+//----------------------------------------------------------------
+//                  stand up
+//----------------------------------------------------------------
+
+void standUp(unitree_legged_msgs::HighCmd &cmd) {
+    cmd.mode = 1;               
+    cmd.bodyHeight = 0.1;
+    cmd.gaitType = 0;
+    cmd.velocity[0] = 0;
+    cmd.velocity[1] = 0;
+    cmd.yawSpeed = 0;
+}
+
+

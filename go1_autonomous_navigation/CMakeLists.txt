@@ -10,6 +10,7 @@ project(go1_autonomous_navigation)
 find_package(catkin REQUIRED
     roscpp
     geometry_msgs
+    nav_msgs
     unitree_legged_real
     unitree_legged_msgs
     unitree_legged_sdk
@@ -140,8 +141,8 @@ include_directories(
 add_executable(go1_walk_node src/go1_walk.cpp)
 target_link_libraries(go1_walk_node ${EXTRA_LIBS} ${catkin_LIBRARIES})
 
-# add_executable(go1_cmdvel_bridge src/go1_cmdvel_bridge.cpp)
-# target_link_libraries(go1_cmdvel_bridge ${catkin_LIBRARIES})
+add_executable(go1_odom_pub src/odom_pub.cpp)
+target_link_libraries(go1_odom_pub ${catkin_LIBRARIES})
 
 # add_dependencies(go1_walk ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
