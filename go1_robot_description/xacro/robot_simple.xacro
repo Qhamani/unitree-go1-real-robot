@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+
+<robot name="go1" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:arg name="DEBUG" default="false"/>
+
+    <!-- Actually, the rotor will rotate and the joint is not fixed. Reduction ratio should be considered. -->
+
+    <!-- Debug mode will hung up the robot, use "true" or "false" to switch it. -->
+    <xacro:if value="$(arg DEBUG)">
+        <link name="world"/>
+        <joint name="base_static_joint" type="fixed">
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <parent link="world"/>
+            <child link="base_link"/>
+        </joint>
+    </xacro:if> 
+    
+    
+<!-- 
+    <link name="base">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.001 0.001 0.001"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="floating_base" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="base_link"/>
+        <child link="trunk"/>
+    </joint> -->
+
+    <link name="trunk">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="package://go1_robot_description/meshes/trunk.dae" scale="1 1 1"/>
+            </geometry>
+            <!-- <material name="orange"/> -->
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="${trunk_length} ${trunk_width} ${trunk_height}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin rpy="0 0 0" xyz="${trunk_com_x} ${trunk_com_y} ${trunk_com_z}"/>
+            <mass value="${trunk_mass}"/>
+            <inertia
+                ixx="${trunk_ixx}" ixy="${trunk_ixy}" ixz="${trunk_ixz}"
+                iyy="${trunk_iyy}" iyz="${trunk_iyz}"
+                izz="${trunk_izz}"/>  
+        </inertial>
+    </link>
+
+
+    <link name="rslidar">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.001 0.001 0.001"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="lidar_joint" type="fixed">
+        <origin rpy="0 0 0.1" xyz="0 0 0"/>
+        <parent link="trunk"/>
+        <child link="rslidar"/>
+    </joint> 
+</robot>

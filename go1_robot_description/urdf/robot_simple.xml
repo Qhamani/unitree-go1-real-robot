@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+
+<robot name="go1-robot">
+     
+
+    <!-- <link name="base_link"/>
+
+    <joint name="base_trunk" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="base_link"/>
+        <child link="trunk"/>
+    </joint>  -->
+        
+
+    <link name="trunk">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="package://go1_robot_description/meshes/trunk.dae" scale="1 1 1"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <link name="rslidar">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.001 0.001 0.001"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="lidar_joint" type="fixed">
+        <origin rpy="0 0 0.1" xyz="0 0 0"/>
+        <parent link="trunk"/>
+        <child link="rslidar"/>
+    </joint> 
+    
+</robot>
