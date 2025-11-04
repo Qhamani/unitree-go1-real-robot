@@ -1,43 +1,39 @@
 #!/usr/bin/env python
 import rospy
-import tf2_ros
-from geometry_msgs.msg import TransformStamped
+import tf
 from nav_msgs.msg import Odometry
 
-class OdomToTFBroadcaster(object):
+class OdomToTFBroadcaster:
     def __init__(self):
         rospy.init_node('odom_to_tf_publisher', anonymous=True)
-        rospy.loginfo("Starting Odometry to TF Broadcaster...")
+        rospy.loginfo("Starting Odometry-to-TF broadcaster (using tf)...")
 
-        self.br = tf2_ros.TransformBroadcaster()
-        rospy.sleep(1.0)
-        rospy.Subscriber('/ros2udp/  odom', Odometry, self.odom_callback)
+        self.br = tf.TransformBroadcaster()
+        rospy.Subscriber("/go1/odom", Odometry, self.odom_callback)
         rospy.spin()
 
     def odom_callback(self, msg):
         try:
-            parent_frame = "odom"
-            child_frame = "trunk"
+            position = msg.pose.pose.position
+            orientation = msg.pose.pose.orientation
+            t = msg.header.stamp if msg.header.stamp != rospy.Time(0) else rospy.Time.now()
 
-            t = TransformStamped()
-            t.header.stamp = msg.header.stamp
-            t.header.frame_id = parent_frame
-            t.child_frame_id = child_frame
-            t.transform.translation.x = msg.pose.pose.position.x
-            t.transform.translation.y = msg.pose.pose.position.y
-            t.transform.translation.z = msg.pose.pose.position.z
-            t.transform.rotation = msg.pose.pose.orientation
-
-            self.br.sendTransform(t)
+            # Broadcast transform: go1odom -> mybase
+            self.br.sendTransform(
+                (position.x, position.y, position.z),
+                (orientation.x, orientation.y, orientation.z, orientation.w),
+                t,
+                "base_link",     # child frame
+                "go1_odom"     # parent frame
+            )
 
         except Exception as e:
-            rospy.logerr("Error processing Odometry message:")
+            rospy.logwarn("Error broadcasting TF: %s" % str(e))
+
+
 
 if __name__ == '__main__':
     try:
         OdomToTFBroadcaster()
     except rospy.ROSInterruptException:
         pass
-
-
-

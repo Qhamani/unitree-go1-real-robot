@@ -11,13 +11,13 @@ class OdomToTFBroadcaster(object):
 
         self.br = tf2_ros.TransformBroadcaster()
         rospy.sleep(1.0)
-        rospy.Subscriber('/ros2udp/odom', Odometry, self.odom_callback)
+        rospy.Subscriber('/odom', Odometry, self.odom_callback)
         rospy.spin()
 
     def odom_callback(self, msg):
         try:
             parent_frame = "map"
-            child_frame = "trunk"
+            child_frame = "base_link"
 
             t = TransformStamped()
             t.header.stamp = msg.header.stamp

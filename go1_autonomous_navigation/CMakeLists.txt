@@ -11,9 +11,11 @@ find_package(catkin REQUIRED
     roscpp
     geometry_msgs
     nav_msgs
+    sensor_msgs
     unitree_legged_real
     unitree_legged_msgs
     unitree_legged_sdk
+    tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -141,8 +143,11 @@ include_directories(
 add_executable(go1_walk_node src/go1_walk.cpp)
 target_link_libraries(go1_walk_node ${EXTRA_LIBS} ${catkin_LIBRARIES})
 
-add_executable(go1_odom_pub src/odom_pub.cpp)
-target_link_libraries(go1_odom_pub ${catkin_LIBRARIES})
+add_executable(go1_odom_node src/odom_pub.cpp)
+target_link_libraries(go1_odom_node ${catkin_LIBRARIES})
+
+add_executable(go1_imu_node src/imu_pub.cpp)
+target_link_libraries(go1_imu_node ${catkin_LIBRARIES})
 
 # add_dependencies(go1_walk ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
