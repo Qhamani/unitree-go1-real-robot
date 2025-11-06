@@ -1,0 +1,10 @@
+<launch>
+  <!-- Define the remote machine -->
+  <machine name="unitree" address="192.168.123.15" env-loader="/opt/ros/YOUR_ROS_VERSION/env.sh"/>
+
+  <!-- Include a launch file to be launched on the remote machine -->
+  <include file="/path/to/remote_file.launch" machine="remote_pc_name"/>
+
+  <!-- Other nodes to launch on the local machine -->
+  <node name="local_node" pkg="your_package" type="your_node_type"/>
+</launch>

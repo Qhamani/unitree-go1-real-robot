@@ -8,7 +8,7 @@
 #include "unitree_legged_sdk/unitree_legged_sdk.h"
 #include <ros/ros.h>
 #include <nav_msgs/Odometry.h>
-
+#include <geometry_msgs/Quaternion.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
 #include <tf/LinearMath/Quaternion.h>
@@ -17,48 +17,17 @@
 #include <math.h>
 
 
+
 using namespace UNITREE_LEGGED_SDK;
 
-ros::Publisher odom_pub;
+ros::Publisher odom_pub;    // publisher for odometry
+
+void baseOdomTF(nav_msgs::Odometry &odom);
 
 void highStateCallback(const unitree_legged_msgs::HighState::ConstPtr &msg)
 {
 
     nav_msgs::Odometry odom;
-
-    // object odom is structured :
-
-    //-------------------------------------------------------
-    //     std_msgs/Header header
-    //   uint32 seq
-    //   time stamp
-    //   string frame_id
-    // string child_frame_id
-    // geometry_msgs/PoseWithCovariance pose
-    //   geometry_msgs/Pose pose
-    //     geometry_msgs/Point position
-    //       float64 x
-    //       float64 y
-    //       float64 z
-    //     geometry_msgs/Quaternion orientation
-    //       float64 x
-    //       float64 y
-    //       float64 z
-    //       float64 w
-    //   float64[36] covariance
-    // geometry_msgs/TwistWithCovariance twist
-    //   geometry_msgs/Twist twist
-    //     geometry_msgs/Vector3 linear
-    //       float64 x
-    //       float64 y
-    //       float64 z
-    //     geometry_msgs/Vector3 angular
-    //       float64 x
-    //       float64 y
-    //       float64 z
-    //   float64[36] covariance
-    //---------------------------------------------------------
-
 
     odom.header.stamp = ros::Time::now();
     odom.header.frame_id = "go1_odom";  
@@ -68,19 +37,21 @@ void highStateCallback(const unitree_legged_msgs::HighState::ConstPtr &msg)
     odom.pose.pose.position.x = msg->position[0];
     odom.pose.pose.position.y = msg->position[1];
     odom.pose.pose.position.z = msg->position[2];
-    
-
-    odom.pose.pose.orientation.x = msg->imu.quaternion[1];
-    odom.pose.pose.orientation.y = msg->imu.quaternion[2];
-    odom.pose.pose.orientation.z = msg->imu.quaternion[3];
-    odom.pose.pose.orientation.w = msg->imu.quaternion[0];
-
 
     odom.twist.twist.linear.x  = msg->velocity[0];
     odom.twist.twist.linear.y  = msg->velocity[1];
     odom.twist.twist.angular.z = msg->yawSpeed;
+    
+    geometry_msgs::Quaternion odom_quat;
+    odom_quat = tf::createQuaternionMsgFromRollPitchYaw(
+                                                msg->imu.rpy[0],
+                                                msg->imu.rpy[1],
+                                                msg->imu.rpy[2]);
+    odom.pose.pose.orientation = odom_quat;
 
     odom_pub.publish(odom);
+
+    baseOdomTF(odom);
    
 }
 
@@ -99,4 +70,26 @@ int main(int argc, char **argv)
     return 0;
 }
 
+//---------------------------------------------------------
+//              Base -> Odometry TF
+//---------------------------------------------------------
+
+void baseOdomTF(nav_msgs::Odometry &odom){
+
+    geometry_msgs::TransformStamped odom_trans;
+    odom_trans.header.stamp = odom.header.stamp;
+    odom_trans.header.frame_id = odom.header.frame_id;
+    odom_trans.child_frame_id = odom.child_frame_id;
+
+    odom_trans.transform.translation.x = odom.pose.pose.position.x;
+    odom_trans.transform.translation.y = odom.pose.pose.position.y;
+    odom_trans.transform.translation.z = odom.pose.pose.position.z;
+    
+    odom_trans.transform.rotation.x = odom.pose.pose.orientation.x;
+    odom_trans.transform.rotation.y = odom.pose.pose.orientation.y;
+    odom_trans.transform.rotation.z = odom.pose.pose.orientation.z;
+    odom_trans.transform.rotation.w = odom.pose.pose.orientation.w;
+
+    odom_broadcaster->sendTransform(odom_trans);
+}
 

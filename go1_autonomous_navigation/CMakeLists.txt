@@ -149,6 +149,9 @@ target_link_libraries(go1_odom_node ${catkin_LIBRARIES})
 add_executable(go1_imu_node src/imu_pub.cpp)
 target_link_libraries(go1_imu_node ${catkin_LIBRARIES})
 
+add_executable(go1_driver_node src/imu_pub.cpp)
+target_link_libraries(go1_driver_node ${catkin_LIBRARIES})
+
 # add_dependencies(go1_walk ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Rename C++ executable without prefix
