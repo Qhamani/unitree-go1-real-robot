@@ -1,15 +1,7 @@
 <launch>
-
-    <arg name="ctrl_level" default="highlevel"/>
-
-    <!-- define params -->
-    <param name="control_level" value="$(arg ctrl_level)"/>
-
-
-    <!-- fire up the ros_udp node responsible for highlevel comms -->
-    <node pkg="unitree_legged_real" type="ros_udp" name="node_ros_udp" args="$(arg ctrl_level)"/> 
-    <node pkg="go1_autonomous_navigation" type="go1_odom_node" name="odometry"/> 
-    <node pkg="go1_autonomous_navigation" type="go1_imu_node" name="imu" output="screen"/>      
+ 
+    <!-- fire up the ros_driver node responsible for highlevel comms -->
+    <node pkg="go1_ros_driver" type="go1_driver" name="go1_driver" output="screen"/>      
     <node pkg="go1_autonomous_navigation" type="go1_walk_node" name="walk" output="screen"/>   
 
     <!-- launching robot description and static joints -->
@@ -21,7 +13,13 @@
     <include file="$(find go1_mapping)/launch/mapping.launch">
         
     </include>
-   
 
+     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <rosparam file="$(find go1_autonomous_navigation)/config/costmap_common_params.yaml" command="load" ns="global_costmap" /> 
+        <rosparam file="$(find go1_autonomous_navigation)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find go1_autonomous_navigation)/config/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find go1_autonomous_navigation)/config/global_costmap_params.yaml" command="load" /> 
+        <rosparam file="$(find go1_autonomous_navigation)/config/base_local_planner_params.yaml" command="load" />
+    </node>
 
 </launch>

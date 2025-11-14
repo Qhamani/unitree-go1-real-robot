@@ -1,13 +1,22 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(go1_mapping)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  sensor_msgs
+)
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+catkin_package(
+  CATKIN_DEPENDS roscpp sensor_msgs
+)
+
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+)
+
+
+add_executable(pointcloud2_stamped src/pointcloud2_stamped.cpp)
+target_link_libraries(pointcloud2_stamped ${EXTRA_LIBS} ${catkin_LIBRARIES})
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)

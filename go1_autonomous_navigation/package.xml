@@ -38,6 +38,7 @@
     <depend>unitree_legged_real</depend>
     <depend>geometry_msgs</depend>
     <depend>nav_msgs</depend>
+    <depend>move_base</depend>
   <!--   Note that this is equivalent to the following: -->
   <!--   <build_depend>roscpp</build_depend> -->
   <!--   <exec_depend>roscpp</exec_depend> -->
